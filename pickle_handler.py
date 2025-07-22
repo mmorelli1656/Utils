@@ -11,46 +11,26 @@ from pathlib import Path
 class PickleHandler:
     """
     Classe utility per salvare e caricare oggetti Python utilizzando pickle.
-    I metodi mantengono nomi familiari: `save_pickle` e `load_pickle`.
+    I metodi sono statici, quindi possono essere usati direttamente dalla classe.
     """
 
-    def __init__(self, verbose=True):
-        self.verbose = verbose
-
-    def save_pickle(self, obj, file_path):
+    @staticmethod
+    def save_pickle(obj, file_path):
         """
         Salva un oggetto Python su file usando pickle.
-
-        Parameters
-        ----------
-        obj : qualsiasi
-            L'oggetto da salvare.
-        file_path : str o Path
-            Il percorso del file.
         """
         file_path = Path(file_path)
         with open(file_path, 'wb') as f:
             pickle.dump(obj, f)
-        if self.verbose:
-            print(f"[PickleHandler] Oggetto salvato in: {file_path}")
+        print(f"[PickleHandler] Oggetto salvato in: {file_path}")
 
-    def load_pickle(self, file_path):
+    @staticmethod
+    def load_pickle(file_path):
         """
         Carica un oggetto Python da un file pickle.
-
-        Parameters
-        ----------
-        file_path : str o Path
-            Il percorso del file pickle.
-
-        Returns
-        -------
-        obj : qualsiasi
-            L'oggetto caricato.
         """
         file_path = Path(file_path)
         with open(file_path, 'rb') as f:
             obj = pickle.load(f)
-        if self.verbose:
-            print(f"[PickleHandler] Oggetto caricato da: {file_path}")
+        print(f"[PickleHandler] Oggetto caricato da: {file_path}")
         return obj
