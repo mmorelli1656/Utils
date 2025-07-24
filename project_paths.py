@@ -181,13 +181,34 @@ class ProjectPaths:
 
     def get_datasets_path(self, *path_parts, processed=False):
         """
-        Restituisce un path nella cartella 01_Datasets, opzionalmente in 'processed/'.
+        Restituisce uno o due path nella cartella 01_Datasets.
+    
+        Parametri:
+        - path_parts: sottopercorsi (es. "input", "gennaio")
+        - processed:
+            - False: restituisce solo 01_Datasets/raw/...
+            - True: restituisce solo 01_Datasets/processed/...
+            - "both": restituisce entrambi (raw_path, processed_path)
+    
+        Ritorna:
+        - Path oppure Tuple[Path, Path]
         """
-        root = self.datasets_root / ("processed" if processed else "raw")
-        path = root.joinpath(*path_parts)
-        path.mkdir(parents=True, exist_ok=True)
-        print(f"Cartella dataset ({'processed' if processed else 'raw'}): {path}")
-        return path
+        raw_path = self.datasets_root / "raw" / Path(*path_parts)
+        proc_path = self.datasets_root / "processed" / Path(*path_parts)
+    
+        if processed == "both":
+            raw_path.mkdir(parents=True, exist_ok=True)
+            proc_path.mkdir(parents=True, exist_ok=True)
+            print(f"Cartella dataset raw: {raw_path}")
+            print(f"Cartella dataset processed: {proc_path}")
+            return raw_path, proc_path
+    
+        selected = proc_path if processed else raw_path
+        selected.mkdir(parents=True, exist_ok=True)
+        label = "processed" if processed else "raw"
+        print(f"Cartella dataset ({label}): {selected}")
+        return selected
+
 
     def get_results_path(self, *path_parts, plots=False):
         """
