@@ -6,39 +6,58 @@ Created on Tue Jul 22 09:53:02 2025
 """
 
 import time
+from typing import Optional, Callable
+
 
 class Timer:
     """
-    Una classe di utilità che misura e stampa il tempo trascorso durante 
-    l'esecuzione di un blocco di codice, utilizzando il costrutto 'with'.
+    Utility class to measure elapsed time of a code block using 'with' statement.
 
-    Esempio d'uso:
-        with Timer("Fase di addestramento"):
+    Example:
+        with Timer("Training phase"):
             train_model()
 
-    Al termine del blocco, stampa il tempo trascorso in formato leggibile.
+    Upon exit, it prints or logs the elapsed time in a human-readable format.
+
+    Parameters
+    ----------
+    label : str, optional
+        Custom label to show in the output (default is "Training time").
+    logger : Optional[Callable[[str], None]], optional
+        Optional logging function to output the timing message.
+        If None, uses print().
     """
 
-    def __init__(self, label="Training time"):
-        # Etichetta personalizzabile da visualizzare nel log
+    def __init__(self, label: str = "Elapsed time", logger: Optional[Callable[[str], None]] = None):
         self.label = label
+        self.logger = logger if logger is not None else print
+        self.start_time: Optional[float] = None
 
     def __enter__(self):
-        # Salva il tempo di inizio del blocco
-        self.start_time = time.time()
-        return self  # opzionale, utile se vuoi accedere a self all'interno del blocco
+        # Use perf_counter for higher resolution timing
+        self.start_time = time.perf_counter()
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        # Calcola il tempo trascorso alla fine del blocco
-        elapsed = time.time() - self.start_time
-        hours = int(elapsed // 3600)
-        minutes = int((elapsed % 3600) // 60)
-        seconds = elapsed % 60
+        if self.start_time is None:
+            # Defensive: if __enter__ was not called properly
+            return
 
-        # Stampa il tempo trascorso in un formato leggibile
+        elapsed = time.perf_counter() - self.start_time
+        formatted = self._format_elapsed(elapsed)
+        self.logger(f"{self.label}: {formatted}")
+
+    @staticmethod
+    def _format_elapsed(seconds: float) -> str:
+        """Format elapsed time in h, min, sec with 2 decimal places."""
+        hours = int(seconds // 3600)
+        minutes = int((seconds % 3600) // 60)
+        secs = seconds % 60
+
         if hours > 0:
-            print(f"{self.label}: {hours} h, {minutes} min e {seconds:.2f} sec")
+            return f"{hours} h, {minutes} min and {secs:.2f} sec"
         elif minutes > 0:
-            print(f"{self.label}: {minutes} min e {seconds:.2f} sec")
+            return f"{minutes} min and {secs:.2f} sec"
         else:
-            print(f"{self.label}: {seconds:.2f} sec")
+            return f"{secs:.2f} sec"
+
