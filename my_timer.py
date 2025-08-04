@@ -11,21 +11,27 @@ from typing import Optional, Callable
 
 class Timer:
     """
-    Utility class to measure elapsed time of a code block using 'with' statement.
+    Context manager to measure and report the elapsed time of a code block.
 
-    Example:
-        with Timer("Training phase"):
-            train_model()
-
-    Upon exit, it prints or logs the elapsed time in a human-readable format.
+    This utility class can be used with the `with` statement to time any block of code.
+    Upon exiting the block, it prints or logs the elapsed time in a human-readable format.
 
     Parameters
     ----------
     label : str, optional
-        Custom label to show in the output (default is "Training time").
-    logger : Optional[Callable[[str], None]], optional
-        Optional logging function to output the timing message.
-        If None, uses print().
+        Custom label to prepend to the timing output (default is "Elapsed time").
+    logger : callable, optional
+        Optional logging function that accepts a single string argument.
+        If None, the built-in `print` function is used.
+
+    Examples
+    --------
+    >>> with Timer("Training phase"):
+    ...     train_model()
+
+    Notes
+    -----
+    Uses `time.perf_counter()` for high-resolution timing.
     """
 
     def __init__(self, label: str = "Elapsed time", logger: Optional[Callable[[str], None]] = None):

@@ -13,19 +13,30 @@ from typing import Optional, Tuple, Union
 
 class ProjectPaths:
     """
-    Utility class to manage the directory structure of a local project, 
-    typically organized under folders like '01_Datasets', '02_Results', and '03_Figures'.
+    Manage the directory structure of a local project with standardized subfolders.
 
-    It supports dynamic location of the project folder, including optional 
-    search paths (e.g., OneDrive or custom locations), and facilitates access 
-    to subdirectories for datasets, results, and figures.
+    This class locates the project directory dynamically by searching in a list of
+    candidate base paths (e.g., OneDrive folders or custom locations). It provides
+    convenient methods to access and create subdirectories typically used in projects:
+    datasets, results, and figures.
+
+    Parameters
+    ----------
+    project : str
+        Name of the project folder inside one of the base search paths.
+    append_subdirs : list of str, optional
+        List of subdirectories (relative to a GitHub folder) to append to `sys.path`.
+        Default is None.
+    search_paths : list of str or Path, optional
+        List of base directories to search for the project folder.
+        If None, default OneDrive paths are used.
 
     Attributes
     ----------
     project : str
-        Name of the project (i.e., the folder name inside a 'Projects' directory).
+        Project name.
     base_path : Path
-        Absolute path to the project root directory.
+        Absolute path to the root of the project.
     datasets_root : Path
         Path to the '01_Datasets' directory inside the project.
     results_root : Path
@@ -38,16 +49,14 @@ class ProjectPaths:
     Methods
     -------
     get_datasets_path(*path_parts, processed=False)
-        Returns a path inside '01_Datasets', optionally under 'processed/'.
-
+        Return path(s) inside '01_Datasets', optionally under 'processed/'.
     get_results_path(*path_parts, plots=False)
-        Returns a path inside '02_Results', optionally with a 'plots/' subdirectory.
-
+        Return path inside '02_Results', optionally with a 'plots/' subfolder.
     get_figures_path(*path_parts)
-        Returns a path inside '03_Figures'.
+        Return path inside '03_Figures'.
 
-    Example
-    -------
+    Examples
+    --------
     >>> paths = ProjectPaths("ClimateModel", search_paths=[r"D:/Projects", r"E:/Work"])
     >>> raw_data_path = paths.get_datasets_path("temperature", "2024")
     >>> result_path, _ = paths.get_results_path("run_01")
@@ -55,7 +64,7 @@ class ProjectPaths:
 
     Notes
     -----
-    This class creates directories on demand if they do not exist.
+    Directories are created automatically if they do not exist.
     """
 
     def __init__(self, project: str, append_subdirs: Optional[list] = None,
