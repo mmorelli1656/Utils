@@ -13,74 +13,100 @@ from typing import Optional, Tuple, Union
 
 class ProjectPaths:
     """
-    Class to manage the directory structure of a local project synced via OneDrive.
+    Utility class to manage the directory structure of a local project, 
+    typically organized under folders like '01_Datasets', '02_Results', and '03_Figures'.
+
+    It supports dynamic location of the project folder, including optional 
+    search paths (e.g., OneDrive or custom locations), and facilitates access 
+    to subdirectories for datasets, results, and figures.
 
     Attributes
     ----------
     project : str
-        Project name (subfolder in 'Projects').
+        Name of the project (i.e., the folder name inside a 'Projects' directory).
     base_path : Path
-        Base path of the selected project.
+        Absolute path to the project root directory.
     datasets_root : Path
-        Path to '01_Datasets' folder.
+        Path to the '01_Datasets' directory inside the project.
     results_root : Path
-        Path to '02_Results' folder.
+        Path to the '02_Results' directory inside the project.
     figures_root : Path
-        Path to '03_Figures' folder.
+        Path to the '03_Figures' directory inside the project.
     user : str
         Current system username.
 
     Methods
     -------
     get_datasets_path(*path_parts, processed=False)
-        Returns a path inside '01_Datasets', optionally inside 'processed/'.
-    
+        Returns a path inside '01_Datasets', optionally under 'processed/'.
+
     get_results_path(*path_parts, plots=False)
-        Returns a path inside '02_Results', optionally with a 'plots/' subfolder.
+        Returns a path inside '02_Results', optionally with a 'plots/' subdirectory.
 
     get_figures_path(*path_parts)
         Returns a path inside '03_Figures'.
+
+    Example
+    -------
+    >>> paths = ProjectPaths("ClimateModel", search_paths=[r"D:/Projects", r"E:/Work"])
+    >>> raw_data_path = paths.get_datasets_path("temperature", "2024")
+    >>> result_path, _ = paths.get_results_path("run_01")
+    >>> fig_path = paths.get_figures_path("paper", "figures")
+
+    Notes
+    -----
+    This class creates directories on demand if they do not exist.
     """
 
-    def __init__(self, project: str, append_subdirs: Optional[list] = None):
+    def __init__(self, project: str, append_subdirs: Optional[list] = None,
+                 search_paths: Optional[list] = None):
         self.project = project
         self.user = getpass.getuser()
-        self.base_path = self._find_onedrive_project_path()
-
+        self.base_path = self._find_project_path(search_paths)
+    
         # Initialize root folders
         self.datasets_root = self.base_path / "01_Datasets"
         self.results_root = self.base_path / "02_Results"
         self.figures_root = self.base_path / "03_Figures"
-
+    
         # Optionally append subdirectories to sys.path
         self._append_to_syspath(append_subdirs)
 
-    def _find_onedrive_project_path(self) -> Path:
+    def _find_project_path(self, search_paths: Optional[list]) -> Path:
         """
-        Attempts to locate the project folder in common OneDrive locations.
-
+        Attempts to locate the project folder in the given search paths.
+    
+        Parameters
+        ----------
+        search_paths : list of str or Path, optional
+            Custom paths where to search for the project folder.
+    
         Returns
         -------
         Path
             Path to the project directory if found.
-
+    
         Raises
         ------
         FileNotFoundError
             If the project directory is not found.
         """
-        candidate_paths = [
+        default_paths = [
             Path(fr"C:\Users\{self.user}\OneDrive - Università degli Studi di Bari (1)\Projects"),
             Path(fr"C:\Users\{self.user}\OneDrive - Università degli Studi di Bari\Projects")
         ]
+    
+        # Use provided search paths or fall back to defaults
+        candidate_paths = [Path(p) for p in search_paths] if search_paths else default_paths
+    
         for base in candidate_paths:
             project_path = base / self.project
             if project_path.exists():
                 print(f"[INFO] Working directory set to: {project_path}")
                 return project_path
-
+    
         raise FileNotFoundError(
-            f"[ERROR] Project '{self.project}' not found in OneDrive folders for user '{self.user}'."
+            f"[ERROR] Project '{self.project}' not found in provided search paths for user '{self.user}'."
         )
 
     def _append_to_syspath(self, subdirs: Optional[list]):
