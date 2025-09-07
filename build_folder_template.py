@@ -98,7 +98,7 @@ class ProjectStructure:
             sub_path = self.project_path / subfolder
             sub_path.mkdir(parents=True, exist_ok=True)
 
-        print(f"Structure created in: {self.project_path.resolve()}")
+        print(f"Structure created in: {self.project_path.resolve()}!")
         return self.project_path
 
     @staticmethod
