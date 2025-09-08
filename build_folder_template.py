@@ -120,7 +120,7 @@ class ProjectStructure:
 
 
 # Example
-project_name = "Wind"
+project_name = input("Insert project name: ")
 destination = Path(r"C:\Users\mik16\OneDrive - Università degli Studi di Bari (1)\Projects")
 ps = ProjectStructure(project_name, destination)
 ps.create()
